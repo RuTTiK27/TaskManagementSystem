@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@model IEnumerable<TaskManagementSystem.Models.Statue>
+
+<div class="px-4 py-5 my-5 text-center">
+    <img class="d-block mx-auto mb-4" src="Images/TMSLogo_1.png" alt="" width="112" height="107">
+    <h1 class="display-5 fw-bold">Task Management System</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">Efficiently manage tasks using our intuitive task management system. Easily assign, track, and prioritize tasks, ensuring deadlines are met and workflows stay organized. The system offers seamless integration with user profiles, real-time updates, and a clean interface for smooth task tracking and management.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a class="btn btn-dark btn-lg px-4 gap-3" asp-area="" asp-controller="User" asp-action="Login">Login</a>
+
+            <a class="btn btn-outline-secondary btn-lg px-4" asp-area="" asp-controller="User" asp-action="Register">Register</a>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row shadow-lg  p-3 mb-5 rounded">
+    <div class="col-lg-6 d-none d-lg-block">
+        <img src="~/Images/Login.jpg" class="img-fluid" />
+    </div>
+    <div class="col-lg-6">
+        <h1>Log In</h1>
+        <form class="row g-3">
+            <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Email">
+            </div>
+            <div class="col-12">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Password">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Log In</button>
+                <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Home">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
