@@ -26,9 +26,33 @@ namespace TaskManagementSystem.Repository
             }
         }
 
+        public bool EmailAlreadyExists(string email)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+            if (user != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public bool UsernameAlreadyExists(string username)
+        {
+            var user = context.Users.FirstOrDefault(u => u.UserName == username);
+            if (user != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         public bool UpdateIsActive(string email, string pin)
         {
-            var user = context.Users.FirstOrDefault(u => u.Email == email);
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
             
             if (user != null && user.Pin == pin)
             {
@@ -44,7 +68,7 @@ namespace TaskManagementSystem.Repository
 
         public bool UpdatePin(string email, string pin)
         {
-            var user = context.Users.FirstOrDefault(u => u.Email == email);
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
             if (user != null)
             {
                 user.Pin = pin;
@@ -56,5 +80,7 @@ namespace TaskManagementSystem.Repository
                 return false;
             }
         }
+
+        
     }
 }

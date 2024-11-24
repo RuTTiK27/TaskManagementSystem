@@ -36,43 +36,62 @@ namespace TaskManagementSystem.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    var filename = "";
-                    if (userRegistrationViewModel.ProfilePicture == null) { filename = "Images/TMSUser.png"; }
+                    if (_userRepository.EmailAlreadyExists(userRegistrationViewModel.Email))
+                    {
+                        TempData["emailAlreadyExists"] = true;
+                    }
+                    else if (_userRepository.UsernameAlreadyExists(userRegistrationViewModel.Username))
+                    {
+                        TempData["usernameAlreadyExists"] = true;
+                    }
                     else
                     {
-                        filename = _fileUploadService.UploadProfilePicture(userRegistrationViewModel.ProfilePicture);
-                        if (filename.Equals("sizeError"))
+                        var filename = "";
+                        if (userRegistrationViewModel.ProfilePicture == null) { filename = "TMSUser.png"; }
+                        else
                         {
-                            TempData["sizeError"] = "Image must be less than 2 MB";
+                            filename = _fileUploadService.UploadProfilePicture(userRegistrationViewModel.ProfilePicture);
+                            if (filename.Equals("SizeError"))
+                            {
+                                TempData["SizeError"] = "Image must be less than 2 MB";
+                            }
+                            else if (filename.Equals("ExtensionError"))
+                            {
+                                TempData["ExtensionError"] = "Only PNG, JPG, JPEG images allowed.";
+                            }
+                        }
+
+                        if (filename.Equals("SizeError"))
+                        {
+                            return View(userRegistrationViewModel);
                         }
                         else if (filename.Equals("ExtensionError"))
                         {
-                            TempData["ExtensionError"] = "Only PNG, JPG, JPEG images allowed.";
+                            return View(userRegistrationViewModel);
                         }
-                    }
-
-                    if (!filename.Equals("sizeError") || !filename.Equals("ExtensionError"))
-                    {
-                        User user = new User()
+                        else 
                         {
-                            FirstName = userRegistrationViewModel.FirstName,
-                            LastName = userRegistrationViewModel.LastName,
-                            UserName = userRegistrationViewModel.Username,
-                            Email = userRegistrationViewModel.Email,
-                            PasswordHash = HashPassword(userRegistrationViewModel.Password),
-                            ProfilePicture = filename,
-                            CreatedDate = DateTime.Now,
-                            UpdatedDate = null,
-                            LastLoginDate = null,
-                            RoleId = 1,
-                            IsActive = false,
-                            Pin = null
-                        };
-                        var status = _userRepository.AddUser(user);
-                        if (status)
-                        {
-                            HttpContext.Session.SetString("Email", userRegistrationViewModel.Email);
-                            return RedirectToAction("VerifyUser", "User");
+                            User user = new User()
+                            {
+                                FirstName = userRegistrationViewModel.FirstName,
+                                LastName = userRegistrationViewModel.LastName,
+                                UserName = userRegistrationViewModel.Username,
+                                Email = userRegistrationViewModel.Email,
+                                PasswordHash = HashPassword(userRegistrationViewModel.Password),
+                                ProfilePicture = filename,
+                                CreatedDate = DateTime.Now,
+                                UpdatedDate = null,
+                                LastLoginDate = null,
+                                RoleId = 1,
+                                IsActive = false,
+                                Pin = null
+                            };
+                            var status = _userRepository.AddUser(user);
+                            if (status)
+                            {
+                                HttpContext.Session.SetString("Email", userRegistrationViewModel.Email);
+                                return RedirectToAction("VerifyUser", "User");
+                            }
                         }
                     }
                 }
@@ -90,7 +109,7 @@ namespace TaskManagementSystem.Controllers
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        public IActionResult VerifyUser(string Email) 
+        public IActionResult VerifyUser() 
         {
             try
             {
@@ -98,7 +117,11 @@ namespace TaskManagementSystem.Controllers
                 string pin = _sendVerifyEmailService.GenerateVerificationCode();
                 if (email != null)
                 {
-                    _userRepository.UpdatePin(email, pin);
+                    var isPinUpdated = _userRepository.UpdatePin(email, pin);
+                    if (isPinUpdated)
+                    {
+                        _sendVerifyEmailService.SendVerificationEmailAsync(email, pin);
+                    }
                 }
                 return View();
             }
@@ -108,7 +131,31 @@ namespace TaskManagementSystem.Controllers
                 ViewBag.Error = ex.Message;
                 throw;
             }
-            
+        }
+
+        [HttpPost]
+        public bool ResendVerification()
+        {
+            try
+            {
+                var email = HttpContext.Session.GetString("Email");
+                string pin = _sendVerifyEmailService.GenerateVerificationCode();
+                if (email != null)
+                {
+                    var isPinUpdated = _userRepository.UpdatePin(email, pin);
+                    if (isPinUpdated)
+                    {
+                        _sendVerifyEmailService.SendVerificationEmailAsync(email, pin);
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("LOG: Registraton action = " + ex.Message, DateTime.UtcNow);
+                ViewBag.Error = ex.Message;
+                throw;
+            }
         }
 
         [HttpPost]

@@ -23,23 +23,27 @@
             //validate file size and extension
             if (size > 2000000)
             {
-                return "sizeError";
+                return "SizeError";
             }
-
-            if (ext.Equals(".png") || ext.Equals(".jpg") || ext.Equals(".jpeg"))
+            else 
             {
-                return "ExtensionError";
-            }
+                if (ext.Equals(".png") || ext.Equals(".jpg") || ext.Equals(".jpeg"))
+                {
+                    string folder = Path.Combine(environment.WebRootPath, "Images/ProfilePictures");
+                    string filename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
+                    string filePath = Path.Combine(folder, filename);
 
-            string folder = Path.Combine(environment.WebRootPath, "Images/ProfilePictures");
-            string filename = Guid.NewGuid().ToString()+"_"+Path.GetFileName(photo.FileName);
-            string filePath = Path.Combine(folder, filename);
-
-            using (var stream = new FileStream(filePath, FileMode.Create)) 
-            {
-                photo.CopyTo(stream);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        photo.CopyTo(stream);
+                    }
+                    return filename; //Return filename for storing in the database
+                }
+                else
+                {
+                    return "ExtensionError";
+                }
             }
-            return filename; //Return filename for storing in the database
         }
 
         public string GetProfilePicturePath(string filename) 
