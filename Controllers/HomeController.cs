@@ -1,6 +1,10 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using NuGet.Protocol;
 using TaskManagementSystem.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TaskManagementSystem.Controllers
 {
@@ -15,16 +19,19 @@ namespace TaskManagementSystem.Controllers
 
         public IActionResult Index(string isFromLogout)
         {
+            var userDetails = HttpContext.Session.GetString("UserDetails");
+            User user = new Models.User();
+            if (userDetails != null)
+            {
+                user = JsonSerializer.Deserialize<User>(userDetails);
+                ViewBag.userDetails = user;
+            }
+            
             if (isFromLogout!=null)
             {
-                if (HttpContext.Session.GetString("Email") != null)
+                if (HttpContext.Session.GetString("UserDetails") != null)
                 {
-                    HttpContext.Session.Remove("Email");
-                }
-
-                if (HttpContext.Session.GetString("userProfile") != null)
-                {
-                    HttpContext.Session.Remove("userProfile");
+                    HttpContext.Session.Remove("UserDetails");
                 }
             }
             return View();

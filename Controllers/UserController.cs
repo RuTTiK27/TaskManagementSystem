@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Text.Json;
 using TaskManagementSystem.Models;
 using TaskManagementSystem.Repository;
 using TaskManagementSystem.Services;
@@ -37,11 +39,10 @@ namespace TaskManagementSystem.Controllers
                         var passwordHashed = _userRepository.GetPassword(userLoginViewModel.Email);
                         if(VerifyPassword(userLoginViewModel.Password, passwordHashed))
                         {
-                            HttpContext.Session.SetString("Email", userLoginViewModel.Email);
+                            setSesson(userLoginViewModel.Email, false);
                             if (_userRepository.ValidUser(userLoginViewModel.Email))
                             {
-                                
-                                HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(userLoginViewModel.Email));
+                                setSesson(userLoginViewModel.Email, true);
                                 return RedirectToAction("UserDashboard", "Task");
                             }
                             else
@@ -72,6 +73,7 @@ namespace TaskManagementSystem.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public IActionResult Register(UserRegistrationViewModel userRegistrationViewModel) 
         {
@@ -132,7 +134,7 @@ namespace TaskManagementSystem.Controllers
                             var status = _userRepository.AddUser(user);
                             if (status)
                             {
-                                HttpContext.Session.SetString("Email", userRegistrationViewModel.Email);
+                                setSesson(userRegistrationViewModel.Email, false);
                                 return RedirectToAction("VerifyUser", "User");
                             }
                         }
@@ -147,14 +149,17 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
+
         private string HashPassword(string password) 
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
+
         public bool VerifyPassword(string enteredPassword, string storedHash)
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
         }
+
         public IActionResult VerifyUser(bool fromForgotPassword) 
         {
             try
@@ -163,7 +168,15 @@ namespace TaskManagementSystem.Controllers
                 {
                     TempData["fromForgotPassword"] = "Yes";
                 }
-                var email = HttpContext.Session.GetString("Email");
+
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                var email = "";
+                if (userDetails != null)
+                {
+                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    email = user.Email;
+                }
+
                 string pin = _sendVerifyEmailService.GenerateVerificationCode();
                 if (email != null)
                 {
@@ -182,12 +195,20 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
+
         [HttpPost]
         public IActionResult VerifyUser(UserVerifyViewModel userVerifyViewModel)
         {
             try
             {
-                var email = HttpContext.Session.GetString("Email");
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                var email = "";
+                if (userDetails != null)
+                {
+                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    email = user.Email;
+                }
+
                 if (ModelState.IsValid)
                 {
                     if (email != null && userVerifyViewModel.Pin != null)
@@ -202,7 +223,7 @@ namespace TaskManagementSystem.Controllers
                         }
                         else if (isValidPin) 
                         {
-                            HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(email));
+                            setSesson(email, true);
                             return RedirectToAction("UserDashboard", "Task");
                         }
                         else
@@ -220,12 +241,20 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
+
         [HttpPost]
         public bool ResendVerification()
         {
             try
             {
-                var email = HttpContext.Session.GetString("Email");
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                var email = "";
+                if (userDetails != null)
+                {
+                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    email = user.Email;
+                }
+
                 string pin = _sendVerifyEmailService.GenerateVerificationCode();
                 if (email != null)
                 {
@@ -244,16 +273,18 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
+
         public IActionResult ForgotPassword() 
         {
             return View(); 
         }
+
         [HttpPost]
         public IActionResult ForgotPassword(UserForgotViewModel userForgotViewModel) 
         {
             if (_userRepository.EmailAlreadyExists(userForgotViewModel.Email))
             {
-                HttpContext.Session.SetString("Email", userForgotViewModel.Email);
+                setSesson(userForgotViewModel.Email, false);
                 return RedirectToAction("VerifyUser", "User", new { fromForgotPassword = true });
             }
             else
@@ -261,23 +292,54 @@ namespace TaskManagementSystem.Controllers
             
             return View(userForgotViewModel);
         }
+        
         public IActionResult ResetPassword()
         {
             return View();
         }
+
         [HttpPost]
         public IActionResult ResetPassword(UserResetPasswordViewModel userResetPasswordViewModel)
         {
             if (ModelState.IsValid) 
             {
-                var email = HttpContext.Session.GetString("Email");
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                var email = "";
+                if (userDetails != null)
+                {
+                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    email = user.Email;
+                }
+
                 if (_userRepository.UpdatePassword(email, HashPassword(userResetPasswordViewModel.Password)))
                 {
-                    HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(email));
+                    setSesson(email, true);
                     return RedirectToAction("UserDashboard", "Task");
                 }
             }
             return View(userResetPasswordViewModel);
         }
+
+        private void setSesson(string email,bool afterlogin) 
+        {
+            if (afterlogin)
+            {
+                var user = _userRepository.getUserDetails(email);
+                HttpContext.Session.SetString("UserDetails", JsonSerializer.Serialize(new
+                {
+                    Email = user.Email,
+                    ProfilePicture = user.ProfilePicture,
+                    UserId = user.UserId
+                }));
+            }
+            else 
+            {
+                HttpContext.Session.SetString("UserDetails", JsonSerializer.Serialize(new
+                {
+                    Email = email,
+                }));
+            }
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿
+﻿@model TaskManagementSystem.Models.AddTaskViewModel
+
 @{
     ViewData["Title"] = "AddTask";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -13,50 +14,40 @@
         @if (ViewBag.Error != null)
         {
             <p class="text-danger">@ViewBag.Error</p>
-        }
-        <h1>Sign Up</h1>
-        @* <form class="row g-3" asp-controller="User" asp-action="Register" enctype="multipart/form-data">
-            <div class="col-md-6">
-                <label asp-for="FirstName" class="form-label">First Name</label>
-                <input class="form-control" placeholder="First Name" asp-for="FirstName">
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+        } 
+        <h1>Add Task</h1>
+        <form class="row g-3" asp-controller="Task" asp-action="AddTask" enctype="multipart/form-data">
+            <div class="col-md-12">
+                <label asp-for="Task.Title" class="form-label">Title</label>
+                <input class="form-control" placeholder="Title" asp-for="Task.Title">
+                <span asp-validation-for="Task.Title" class="text-danger"></span>
             </div>
-            <div class="col-md-6">
-                <label asp-for="LastName" class="form-label">Last Name</label>
-                <input class="form-control" placeholder="Last Name" asp-for="LastName">
-                <span asp-validation-for="LastName" class="text-danger"></span>
+            
+            <div class="col-12">
+                <label asp-for="Task.Description" class="form-label">Description</label>
+                <input class="form-control" placeholder="Description" asp-for="Task.Description">
+                <span asp-validation-for="Task.Description" class="text-danger"></span>
             </div>
             <div class="col-12">
-                <label asp-for="Username" class="form-label">Username</label>
-                <input class="form-control" placeholder="Username" asp-for="Username">
-                <span asp-validation-for="Username" class="text-danger"></span>
-                @if (@TempData["usernameAlreadyExists"] != null)
-                {
-                    <span class="text-danger fw-bold">Username already exists! Please choose different username.</span>
-                }
+                <label asp-for="Task.DueDate" class="form-label">DueDate</label>
+                <input class="form-control" placeholder="DueDate" asp-for="Task.DueDate">
+                <span asp-validation-for="Task.DueDate" class="text-danger"></span>
             </div>
             <div class="col-12">
-                <label asp-for="Email" class="form-label">Email</label>
-                <input class="form-control" placeholder="Email" asp-for="Email">
-                <span asp-validation-for="Email" class="text-danger"></span>
-                @if (@TempData["emailAlreadyExists"] != null)
-                {
-                    <span class="text-danger fw-bold">Email already exists! Please choose different email.</span>
-                }
+                <label asp-for="PriorityId" class="form-label">Priority</label>
+                <select asp-for="PriorityId" asp-items="Model.Priorities" class="form-control">
+                </select>
+                <span asp-validation-for="PriorityId" class="text-danger"></span>
             </div>
-            <div class="col-12">
-                <label asp-for="Password" class="form-label">Password</label>
-                <input class="form-control" placeholder="Password" asp-for="Password">
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="col-12">
-                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-                <input class="form-control" placeholder="Confirm Password" asp-for="ConfirmPassword">
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            <div class="col-12">
-                <label asp-for="ProfilePicture" class="form-label">Profile Picture (Optional)</label>
-                <input class="form-control" asp-for="ProfilePicture">
+             <div class="col-12">
+                <label asp-for="StatusId" class="form-label">Confirm Password</label>
+                <select asp-for="StatusId" asp-items="Model.Statuses" class="form-control">
+                </select>
+                <span asp-validation-for="StatusId" class="text-danger"></span>
+            </div> 
+            @* <div class="col-12">
+                <label for="Attachments" class="form-label">Attachments (Optional)</label>
+                <input class="form-control" type="file" multiple>
                 @if (@TempData["SizeError"] != null)
                 {
                     <span class="text-danger fw-bold">@TempData["SizeError"]</span>
@@ -65,11 +56,11 @@
                 {
                     <span class="text-danger fw-bold">@TempData["ExtensionError"]</span>
                 }
-            </div>
+            </div> *@
             <div class="col-12">
-                <button type="submit" class="btn btn-primary">Sign in</button>
+                <button type="submit" class="btn btn-primary">Add Task</button>
                 <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Home">Back</a>
             </div>
-        </form> *@
+        </form>
     </div>
 </div>

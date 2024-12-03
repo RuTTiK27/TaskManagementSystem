@@ -123,12 +123,12 @@ namespace TaskManagementSystem.Repository
             }
         }
 
-        public string GetUserProfile(string email)
+        public User getUserDetails(string email)
         {
             var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
             if (user != null)
             {
-                return user.ProfilePicture;
+                return user;
             }
             else
             {

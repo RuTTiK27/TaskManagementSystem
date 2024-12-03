@@ -1,4 +1,6 @@
-﻿using Task = TaskManagementSystem.Models.Task;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using TaskManagementSystem.Models;
+using Task = TaskManagementSystem.Models.Task;
 
 namespace TaskManagementSystem.Repository
 {
@@ -6,5 +8,7 @@ namespace TaskManagementSystem.Repository
     {
         List<Task> getAllTasks();
         Task getTaskById(int id);
+        IEnumerable<SelectListItem> getPriorities();
+        IEnumerable<SelectListItem> getStatuses();
     }
 }

@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+
 @model IEnumerable<TaskManagementSystem.Models.Statue>
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor accessor
 <div class="px-4 py-5 my-5 text-center">
@@ -10,8 +11,8 @@
         <p class="lead mb-4">Efficiently manage tasks using our intuitive task management system. Easily assign, track, and prioritize tasks, ensuring deadlines are met and workflows stay organized. The system offers seamless integration with user profiles, real-time updates, and a clean interface for smooth task tracking and management.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
             @{
-                var userProfile = @accessor.HttpContext.Session.GetString("userProfile");
-                @if (userProfile != null)
+
+                @if (ViewBag.userDetails != null)
                 {
                     <a class="btn btn-outline-secondary btn-lg px-4" asp-area="" asp-controller="Task" asp-action="UserDashboard">User Dashboard</a>
                 }

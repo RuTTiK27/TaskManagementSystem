@@ -12,6 +12,6 @@ namespace TaskManagementSystem.Repository
         string GetPassword(string email);
         bool ValidUser(string email);
         bool UpdatePassword(string email, string password);
-        string GetUserProfile(string email);
+        User getUserDetails(string email);
     }
 }

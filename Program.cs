@@ -33,6 +33,9 @@ builder.Services.AddTransient<SendVerifyEmailService>();
 //Register the UserRepository here
 builder.Services.AddScoped<IUser, UserRepository>();
 
+//Register the UserRepository here
+builder.Services.AddScoped<ITask, TaskRepository>();
+
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
