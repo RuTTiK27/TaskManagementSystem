@@ -13,8 +13,20 @@ namespace TaskManagementSystem.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string isFromLogout)
         {
+            if (isFromLogout!=null)
+            {
+                if (HttpContext.Session.GetString("Email") != null)
+                {
+                    HttpContext.Session.Remove("Email");
+                }
+
+                if (HttpContext.Session.GetString("userProfile") != null)
+                {
+                    HttpContext.Session.Remove("userProfile");
+                }
+            }
             return View();
         }
 

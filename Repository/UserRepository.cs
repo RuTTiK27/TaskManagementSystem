@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 using TaskManagementSystem.Data;
 using TaskManagementSystem.Models;
 
@@ -81,6 +82,58 @@ namespace TaskManagementSystem.Repository
             }
         }
 
+        public string GetPassword(string email)
+        {
+            var user = context.Users.FirstOrDefault(u=>u.Email.ToLower() == email.ToLower());
+            if (user != null) 
+            {
+                return user.PasswordHash;
+            }
+            else
+            {
+                return null;
+            }
+        }
         
+        public bool ValidUser(string email)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+            if (user != null && user.IsActive==true)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool UpdatePassword(string email, string password)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+            if (user != null)
+            {
+                user.PasswordHash = password;
+                context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public string GetUserProfile(string email)
+        {
+            var user = context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+            if (user != null)
+            {
+                return user.ProfilePicture;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

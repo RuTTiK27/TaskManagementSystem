@@ -1,4 +1,4 @@
-﻿
+﻿@model TaskManagementSystem.Models.UserLoginViewModel
 @{
     ViewData["Title"] = "Login";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -9,15 +9,26 @@
     </div>
     <div class="col-lg-6">
         <h1>Log In</h1>
-        <form class="row g-3">
+        <form class="row g-3" asp-controller="User" asp-action="Login">
             <div class="col-12">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" placeholder="Email">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input class="form-control" placeholder="Email" asp-for="Email">
+                <span asp-validation-for="Email" class="text-danger"></span>
+                @if (@TempData["EmailNotExists"] != null)
+                {
+                    <span class="text-danger fw-bold">Email does not exists.</span>
+                }
             </div>
             <div class="col-12">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" placeholder="Password">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input class="form-control" placeholder="Password" asp-for="Password">
+                <span asp-validation-for="Password" class="text-danger"></span>
+                @if (@TempData["incorrectPassword"] != null)
+                {
+                    <span class="text-danger fw-bold">Entered password is incorrect.</span>
+                }
             </div>
+            <a asp-action="ForgotPassword" asp-controller="User">Forgot Password</a>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Log In</button>
                 <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Home">Back</a>

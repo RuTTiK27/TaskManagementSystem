@@ -25,6 +25,49 @@ namespace TaskManagementSystem.Controllers
         {
             return View();
         }
+        [HttpPost]
+        public IActionResult Login(UserLoginViewModel userLoginViewModel)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (_userRepository.EmailAlreadyExists(userLoginViewModel.Email)) 
+                    {
+                        var passwordHashed = _userRepository.GetPassword(userLoginViewModel.Email);
+                        if(VerifyPassword(userLoginViewModel.Password, passwordHashed))
+                        {
+                            HttpContext.Session.SetString("Email", userLoginViewModel.Email);
+                            if (_userRepository.ValidUser(userLoginViewModel.Email))
+                            {
+                                
+                                HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(userLoginViewModel.Email));
+                                return RedirectToAction("UserDashboard", "Task");
+                            }
+                            else
+                            {
+                                return RedirectToAction("VerifyUser", "User");
+                            }
+                        }
+                        else 
+                        {
+                            TempData["incorrectPassword"] = true;
+                        }
+                    }
+                    else
+                    {
+                        TempData["EmailNotExists"] = true;
+                    }
+                }
+                return View(userLoginViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("LOG: Registraton action = " + ex.Message, DateTime.UtcNow);
+                ViewBag.Error = ex.Message;
+                throw;
+            }
+        }
         public IActionResult Register()
         {
             return View();
@@ -108,11 +151,18 @@ namespace TaskManagementSystem.Controllers
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
-
-        public IActionResult VerifyUser() 
+        public bool VerifyPassword(string enteredPassword, string storedHash)
+        {
+            return BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash);
+        }
+        public IActionResult VerifyUser(bool fromForgotPassword) 
         {
             try
             {
+                if (fromForgotPassword) 
+                {
+                    TempData["fromForgotPassword"] = "Yes";
+                }
                 var email = HttpContext.Session.GetString("Email");
                 string pin = _sendVerifyEmailService.GenerateVerificationCode();
                 if (email != null)
@@ -132,7 +182,44 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
-
+        [HttpPost]
+        public IActionResult VerifyUser(UserVerifyViewModel userVerifyViewModel)
+        {
+            try
+            {
+                var email = HttpContext.Session.GetString("Email");
+                if (ModelState.IsValid)
+                {
+                    if (email != null && userVerifyViewModel.Pin != null)
+                    {
+                        var isValidPin = _userRepository.UpdateIsActive(email, userVerifyViewModel.Pin);
+                        if (TempData["fromForgotPassword"]!=null)
+                        {
+                            if (isValidPin && TempData["fromForgotPassword"].ToString().Equals("Yes"))
+                            {
+                                return RedirectToAction("ResetPassword", "User");
+                            }
+                        }
+                        else if (isValidPin) 
+                        {
+                            HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(email));
+                            return RedirectToAction("UserDashboard", "Task");
+                        }
+                        else
+                        {
+                            TempData["incorrectPin"] = "Entered PIN is incorrect";
+                        }
+                    }
+                }
+                return View(userVerifyViewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("LOG: Registraton action = " + ex.Message, DateTime.UtcNow);
+                ViewBag.Error = ex.Message;
+                throw;
+            }
+        }
         [HttpPost]
         public bool ResendVerification()
         {
@@ -157,36 +244,40 @@ namespace TaskManagementSystem.Controllers
                 throw;
             }
         }
-
-        [HttpPost]
-        public IActionResult VerifyUser(UserVerifyViewModel userVerifyViewModel) 
+        public IActionResult ForgotPassword() 
         {
-            try
+            return View(); 
+        }
+        [HttpPost]
+        public IActionResult ForgotPassword(UserForgotViewModel userForgotViewModel) 
+        {
+            if (_userRepository.EmailAlreadyExists(userForgotViewModel.Email))
+            {
+                HttpContext.Session.SetString("Email", userForgotViewModel.Email);
+                return RedirectToAction("VerifyUser", "User", new { fromForgotPassword = true });
+            }
+            else
+                TempData["EmailNotExists"] = true;
+            
+            return View(userForgotViewModel);
+        }
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult ResetPassword(UserResetPasswordViewModel userResetPasswordViewModel)
+        {
+            if (ModelState.IsValid) 
             {
                 var email = HttpContext.Session.GetString("Email");
-                if (ModelState.IsValid)
+                if (_userRepository.UpdatePassword(email, HashPassword(userResetPasswordViewModel.Password)))
                 {
-                    if (email !=null && userVerifyViewModel.Pin!=null) 
-                    {
-                        var isValidPin = _userRepository.UpdateIsActive(email, userVerifyViewModel.Pin);
-                        if (isValidPin) 
-                        {
-                            return RedirectToAction("UserDashboard", "Task");
-                        }
-                        else
-                        {
-                            TempData["incorrectPin"] = "Entered PIN is incorrect";
-                        }
-                    }
+                    HttpContext.Session.SetString("userProfile", _userRepository.GetUserProfile(email));
+                    return RedirectToAction("UserDashboard", "Task");
                 }
-                return View(userVerifyViewModel);
             }
-            catch (Exception ex) 
-            {
-                _logger.LogInformation("LOG: Registraton action = " + ex.Message, DateTime.UtcNow);
-                ViewBag.Error = ex.Message;
-                throw;
-            }
+            return View(userResetPasswordViewModel);
         }
     }
 }

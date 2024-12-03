@@ -1,19 +1,21 @@
-﻿@model TaskManagementSystem.Models.UserRegistrationViewModel
+﻿
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "AddTask";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+
 <div class="row shadow-lg  p-3 mb-5 rounded">
     <div class="col-lg-6 d-none d-lg-block">
-        <img src="~/Images/Registration.jpg" class="img-fluid" />
+        <img src="~/Images/Task.jpg" class="img-fluid" />
     </div>
     <div class="col-lg-6">
-        @if (ViewBag.Error!=null)
+        @if (ViewBag.Error != null)
         {
             <p class="text-danger">@ViewBag.Error</p>
         }
         <h1>Sign Up</h1>
-        <form class="row g-3" asp-controller="User" asp-action="Register" enctype="multipart/form-data">
+        @* <form class="row g-3" asp-controller="User" asp-action="Register" enctype="multipart/form-data">
             <div class="col-md-6">
                 <label asp-for="FirstName" class="form-label">First Name</label>
                 <input class="form-control" placeholder="First Name" asp-for="FirstName">
@@ -55,7 +57,7 @@
             <div class="col-12">
                 <label asp-for="ProfilePicture" class="form-label">Profile Picture (Optional)</label>
                 <input class="form-control" asp-for="ProfilePicture">
-                @if (@TempData["SizeError"]!=null)
+                @if (@TempData["SizeError"] != null)
                 {
                     <span class="text-danger fw-bold">@TempData["SizeError"]</span>
                 }
@@ -68,6 +70,6 @@
                 <button type="submit" class="btn btn-primary">Sign in</button>
                 <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Home">Back</a>
             </div>
-        </form>
+        </form> *@
     </div>
 </div>

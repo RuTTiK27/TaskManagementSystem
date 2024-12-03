@@ -9,5 +9,9 @@ namespace TaskManagementSystem.Repository
         bool UpdateIsActive(string email, string pin);
         bool EmailAlreadyExists(string email);
         bool UsernameAlreadyExists(string username);
+        string GetPassword(string email);
+        bool ValidUser(string email);
+        bool UpdatePassword(string email, string password);
+        string GetUserProfile(string email);
     }
 }
