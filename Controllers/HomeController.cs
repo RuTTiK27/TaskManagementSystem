@@ -42,6 +42,22 @@ namespace TaskManagementSystem.Controllers
             return View();
         }
 
+        [HttpPost]
+        public IActionResult ExtendSession()
+        {
+            try
+            {
+                HttpContext.Session.SetString("UserDetails", HttpContext.Session.GetString("UserDetails")??"");
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+                throw;
+            }
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

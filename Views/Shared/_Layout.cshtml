@@ -54,9 +54,27 @@
             &copy; 2024 - TaskManagementSystem - <a class="text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    <script>
+        const sessionTimeout = 2 * 60 * 1000;
+        const warningTime = 1 * 60 * 1000;
+
+        setTimeout(()=>{
+            if(confirm("Your session is about to expire. Would you like to extend it?")){
+                fetch('/Home/ExtendSession',{method:'POST'})
+                .then(response=>{
+                    if(response.ok){
+                        alert("Your session has been extended!");
+                    }else{
+                        alert('Unable to extend the session. Please login again');
+                    }
+                });
+            }
+        },warningTime);
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>
