@@ -1,0 +1,54 @@
+﻿@model TaskManagementSystem.Models.ShowTaskViewModel
+
+
+
+<div class="d-flex text-body-secondary pt-3">
+    <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" focusable="false">
+        <title>@Model.TaskId</title>
+        <rect width="100%" height="100%" fill="@(Model.randomColour)" />
+    </svg>
+    <p class="pb-3 mb-0 small lh-sm border-bottom">
+        <strong class="d-block text-gray-dark">
+            @Model.Title
+            @if (Model.PriorityName == "Low")
+            {
+                <span class="badge rounded-pill bg-success">@Model.PriorityName</span>
+            }
+            else if (Model.PriorityName == "Medium")
+            {
+                <span class="badge rounded-pill bg-warning">@Model.PriorityName</span>
+
+            }else{
+                <span class="badge rounded-pill bg-danger">@Model.PriorityName</span>
+            }
+
+            @if (Model.StatusName == "Completed")
+            {
+                <span class="badge rounded-pill bg-success">@Model.StatusName</span>
+            }
+            else if (Model.StatusName == "In Progress")
+            {
+                <span class="badge rounded-pill bg-warning">@Model.StatusName</span>
+            }
+            else
+            {
+                <span class="badge rounded-pill bg-danger">@Model.StatusName</span>
+            }
+
+            @if (@Model.AttachmentsCount > 0) 
+            {
+                <button type="button" class="badge bg-white text-dark  rounded-pill" onclick="showAttachments(@Model.TaskId)">
+                    Show Attatchments
+                    <span class="badge bg-secondary">
+                        @Model.AttachmentsCount
+                    </span>
+                </button>
+            }
+            
+
+        </strong>
+            @Model.Description
+        </p>
+        
+    </div>
+    

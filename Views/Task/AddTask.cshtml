@@ -73,19 +73,20 @@
                 <span asp-validation-for="PriorityId" class="text-danger"></span>
             </div>
              <div class="col-12">
-                <label asp-for="StatusId" class="form-label">Confirm Password</label>
+                <label asp-for="StatusId" class="form-label">Status</label>
                 <select asp-for="StatusId" asp-items="Model.Statuses" class="form-control">
                 </select>
                 <span asp-validation-for="StatusId" class="text-danger"></span>
             </div> 
              <div class="col-12">
-                <label asp-for="Attachments" class="form-label">Attachments</label>
+                <label asp-for="Attachments" class="form-label">Attachments (Optional)</label>
                 <div class="input-group">
                     <input class="form-control" placeholder="Attachments" asp-for="Attachments">
                     <button class="btn btn-outline-secondary" type="button" onclick="previewFiles()">Show</button>
                 </div>
                 <span class="text-secondary"> Only this extensions allowed .jpg,.jpeg,.png,.heic,.pdf,.docx,.xlsx,.doc,xls,.mp4,.mkv </span>
                 <span class="text-secondary"> Maximum file size=4MB && Maximum number of files=4</span>
+                <br />
                 <span asp-validation-for="Attachments" class="text-danger"></span>
 
                 <div id="filePreview" class="mt-3 d-none">
@@ -94,7 +95,7 @@
             </div>
             <div class="col-12">
                 <button type="submit" class="btn btn-primary">Add Task</button>
-                <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Home">Back</a>
+                <a class="btn btn-outline-dark" asp-action="UserDashboard" asp-controller="Task">Back</a>
             </div>
         </form>
     </div>

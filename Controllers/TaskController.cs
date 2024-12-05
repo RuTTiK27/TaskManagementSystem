@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
+using System.Linq;
 using System.Text.Json;
 using TaskManagementSystem.Filters;
 using TaskManagementSystem.Models;
 using TaskManagementSystem.Repository;
+using Task = TaskManagementSystem.Models.Task;
 
 
 namespace TaskManagementSystem.Controllers
@@ -13,11 +16,14 @@ namespace TaskManagementSystem.Controllers
     {
         private readonly ITask _taskRepository; 
         private readonly ILogger<UserController> _logger;
-        public TaskController(ITask taskRepository, ILogger<UserController> logger)
+        private readonly IWebHostEnvironment _environment;
+
+        public TaskController(ITask taskRepository, ILogger<UserController> logger, IWebHostEnvironment environment)
         {
                 _taskRepository = taskRepository;
                 _logger = logger;
                 _logger = logger;
+                _environment = environment;
         }
         public IActionResult UserDashboard()
         {
@@ -28,8 +34,46 @@ namespace TaskManagementSystem.Controllers
                 user = JsonSerializer.Deserialize<User>(userDetails);
                 ViewBag.userDetails = user;
             }
-            return View();
+
+            string[] colorPalette = {
+            "#007bff", "#0056b3", "#3399ff", "#0044cc", "#0066cc", // Blue Shades
+            "#e83e8c", "#d63384", "#f062a5", "#c2185b", "#ff4d94", "#e63985", // Pink Shades
+            "#6f42c1", "#5a34a6", "#7b4ec7", "#5e2eab", "#8e44d4", "#7648c9" // Purple Shades
+            };
+            var random = new Random();
+
+            List<ShowTaskViewModel> showTaskViewModels = new List<ShowTaskViewModel>();
+            var tasks = _taskRepository.GetAllTask();
+            
+            foreach (var task in tasks) 
+            {
+                showTaskViewModels.Add(new ShowTaskViewModel
+                {
+                    TaskId = task.TaskId,
+                    Title = task.Title,
+                    Description = task.Description,
+                    DueDate = task.DueDate,
+                    PriorityName = task.Priority.PriorityName,
+                    StatusName = task.Status.StatusName,
+                    randomColour = colorPalette[random.Next(colorPalette.Length)],
+                    AttachmentsCount = task.Attachments.Count
+                });
+            }
+
+            return View(showTaskViewModels);
         }
+
+        [HttpGet]
+        public IActionResult GetAttachments(int taskId) 
+        {
+            var attachments = _taskRepository.GetAttachments(taskId);
+            if (attachments == null )
+            {
+                return Json(new { success = false, message = "No attachments found." });
+            }
+            return Json ( new { success = true,Data = attachments });
+        }
+
         public IActionResult AddTask()
         {
             var userDetails = HttpContext.Session.GetString("UserDetails");
@@ -73,32 +117,84 @@ namespace TaskManagementSystem.Controllers
             {
                 ModelState.AddModelError("StatusId", "Please Select Status");
             }
-            var validExtensions = new[] { "jpg", "jpeg", "png","heic","pdf","docx","xlsx","doc","xls","mp4","mkv" };
-            const long maxSize = 4 * 1024 * 1024; //4MB in bytes
-            if (addTaskViewModel.Attachments.Count>4)
+
+            if (addTaskViewModel.Attachments != null) 
             {
-                ModelState.AddModelError("Attachments", "More than 4 files are not allowed");
-            }
-            foreach (var file in addTaskViewModel.Attachments)
-            {
-                if (file != null)
+                var validExtensions = new[] { "jpg", "jpeg", "png", "heic", "pdf", "docx", "xlsx", "doc", "xls", "mp4", "mkv" };
+                const long maxSize = 4 * 1024 * 1024; //4MB in bytes
+                if (addTaskViewModel.Attachments.Count > 4)
                 {
-                    var fileExtension = Path.GetExtension(file.FileName).ToLower();
-                    if (validExtensions.Contains(fileExtension)) 
+                    ModelState.AddModelError("Attachments", "More than 4 files are not allowed");
+                }
+                foreach (var file in addTaskViewModel.Attachments)
+                {
+                    if (file != null)
                     {
-                        ModelState.AddModelError("Attachments", $"File {file.FileName} has an invalid file type.");
-                        return View(addTaskViewModel);
-                    }
-                    if(file.Length > maxSize) 
-                    {
-                        ModelState.AddModelError("Attachments", $"File {file.FileName} exceeds the 8MB size limit.");
-                        return View(addTaskViewModel);
+                        var fileExtension = Path.GetExtension(file.FileName).ToLower();
+                        if (validExtensions.Contains(fileExtension))
+                        {
+                            ModelState.AddModelError("Attachments", $"File {file.FileName} has an invalid file type.");
+                            return View(addTaskViewModel);
+                        }
+                        if (file.Length > maxSize)
+                        {
+                            ModelState.AddModelError("Attachments", $"File {file.FileName} exceeds the 8MB size limit.");
+                            return View(addTaskViewModel);
+                        }
                     }
                 }
             }
+
+            var userDetails = HttpContext.Session.GetString("UserDetails");
+            User user = new Models.User();
+            if (userDetails != null)
+            {
+                user = JsonSerializer.Deserialize<User>(userDetails);
+            }
+
             if (ModelState.IsValid) 
             {
+                Task task = new Task()
+                {
+                    Title = addTaskViewModel.Title,
+                    Description = addTaskViewModel.Description,
+                    DueDate = addTaskViewModel.DueDate,
+                    PriorityId = addTaskViewModel.PriorityId,
+                    StatusId = addTaskViewModel.StatusId,
+                    AssignedUserId = user.UserId,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = null
+                };
+                var taskId = _taskRepository.AddTask(task);
+                if (addTaskViewModel.Attachments != null)
+                {
+                    foreach (var file in addTaskViewModel.Attachments)
+                    {
+                        string folder = Path.Combine(_environment.WebRootPath, "Attachments/");
+                        string filename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+                        string filePath = Path.Combine(folder, filename);
 
+                        using (var fileStram = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(fileStram);
+                        }
+                        Attachment attachment = new Attachment()
+                        {
+                            FileName = file.FileName,
+                            FilePath = filePath,
+                            FileType = Path.GetExtension(file.FileName).ToLower(),
+                            FileSize = Convert.ToInt32(file.Length / (1024.0 * 1024.0)),
+                            IsDeleted = false,
+                            TaskId = taskId,
+                            CreatedDate = DateTime.Now,
+                            UpdatedDate = null,
+                        };
+                        _taskRepository.AddAttachment(attachment);
+                    }
+                    _taskRepository.saveAttachments();
+                }
+                TempData["ShowToast"] = "Yes";
+                return RedirectToAction("UserDashboard","Task");
             }
             else
             {
