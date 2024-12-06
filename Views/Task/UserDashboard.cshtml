@@ -4,15 +4,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
-    .bg-purple {
-    background-color: #6f42c1;
-    }
-</style>
 
 <main class="container">
     <div class="row my-3 p-3 text-white bg-purple rounded shadow-lg">
-        <div class="col-6">
+        <div class="col-3">
             <a class="btn btn-light" asp-action="AddTask" asp-controller="Task">
                 Add New <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
@@ -25,17 +20,71 @@
                 </svg>
             </a>
         </div>
-        <div class="col-6 d-flex">
-            <div class="input-group ">
-                <input type="text" class="form-control" placeholder="Search by task name">
-                <button class="btn btn-outline-light" type="button" id="button-addon2">Search</button>
-            </div>
-            <div class="input-group ms-3">
-                @* <input type="text" class="form-control" placeholder="Search by task name"> *@
-                <input type="date" class="btn btn-light " placeholder="select date" />
-                <button class="btn btn-outline-light" type="button" id="button-addon2">Show</button>
-            </div>
+        <div class="col-9 d-flex">
+                <form asp-action="UserDashboard" asp-controller="Task" method="get">
+                    <div class="input-group ">
+                        <input type="text" name="search" class="form-control" placeholder="Search by task name" required>
+                        <button class="btn btn-outline-light" type="submit" id="button-addon2">Search</button>
+                    </div>
+                </form>
+                <form asp-action="UserDashboard" asp-controller="Task" method="get">
+                    <div class="input-group ms-3">
+                        @* <input type="text" class="form-control" placeholder="Search by task name"> *@
+                        <input type="date" required name="dueDate" class="btn btn-light " placeholder="select date" title="Search by due date" />
+                        <button class="btn btn-outline-light" type="submit" id="button-addon2">Show</button>
+                    </div>
+                </form>
 
+            <div class="dropdown">
+                <button class="btn text-light dropdown-toggle ms-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Priority
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-activity" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2" />
+                    </svg>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" asp-route-priority="High" asp-action="UserDashboard" asp-controller="Task">
+                            High
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-route-priority="Low" asp-action="UserDashboard" asp-controller="Task">
+                            Low
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-route-priority="Medium" asp-action="UserDashboard" asp-controller="Task">
+                            Medium
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="dropdown">
+                <button class="btn text-light dropdown-toggle ms-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Status
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16">
+                        <path d="M4 11H2v3h2zm5-4H7v7h2zm5-5v12h-2V2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" />
+                    </svg>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" asp-route-status="Completed" asp-action="UserDashboard" asp-controller="Task">
+                            Completed
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-route-status="InProcess" asp-action="UserDashboard" asp-controller="Task">
+                            In Process
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" asp-route-status="Pending" asp-action="UserDashboard" asp-controller="Task">
+                            Pending
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <div class="dropdown">
                 <button class="btn text-light dropdown-toggle ms-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Sort <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
@@ -44,7 +93,7 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" asp-route-sortBy="lastAdded" asp-action="UserDashboard" asp-controller="Task">
                             Sort by last added
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1" />
@@ -52,7 +101,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" asp-route-sortBy="title" asp-action="UserDashboard" asp-controller="Task">
                             Sort by title
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-heading" viewBox="0 0 16 16">
                                 <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z" />
@@ -64,10 +113,10 @@
             </div>
         </div>
     </div>
-
+    
     <div class="row">
         <div class="col-6">
-            <div class="my-3 p-3 bg-white rounded shadow-lg">
+            <div class="my-3 p-3 bg-white rounded shadow-lg task-list-container">
                 <h6 class="border-bottom pb-2 mb-0">All</h6>
                 @foreach (var item in Model)
                 {

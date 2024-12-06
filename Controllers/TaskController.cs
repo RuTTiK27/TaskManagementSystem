@@ -25,7 +25,7 @@ namespace TaskManagementSystem.Controllers
                 _logger = logger;
                 _environment = environment;
         }
-        public IActionResult UserDashboard()
+        public IActionResult UserDashboard(string? sortBy = null,string? search=null,DateTime? dueDate=null,string? priority=null,string? status=null)
         {
             var userDetails = HttpContext.Session.GetString("UserDetails");
             User user = new Models.User();
@@ -43,9 +43,44 @@ namespace TaskManagementSystem.Controllers
             var random = new Random();
 
             List<ShowTaskViewModel> showTaskViewModels = new List<ShowTaskViewModel>();
-            var tasks = _taskRepository.GetAllTask();
-            
-            foreach (var task in tasks) 
+            var tasks = _taskRepository.GetAllTask(user.UserId);
+            var query = tasks.AsQueryable();
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                query = query.Where(t => t.Title.Contains(search, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (dueDate!=null)
+            {
+                query = query.Where(t => t.DueDate.Date == dueDate);
+            }
+
+            if (!String.IsNullOrEmpty(status))
+            {
+                query = query.Where(t => t.Status.StatusName.Equals(status, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!String.IsNullOrEmpty(priority))
+            {
+                query = query.Where(t => t.Priority.PriorityName.Equals(priority, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (sortBy!=null)
+            {
+                switch (sortBy.ToLower())
+                {
+                    case "title":
+                        query = query.OrderBy(x => x.Title);
+                        break;
+                    case "lastadded":
+                        query = query.OrderByDescending(x => x.CreatedDate);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            foreach (var task in query) 
             {
                 showTaskViewModels.Add(new ShowTaskViewModel
                 {
@@ -62,7 +97,7 @@ namespace TaskManagementSystem.Controllers
 
             return View(showTaskViewModels);
         }
-
+        
         [HttpGet]
         public IActionResult GetAttachments(int taskId) 
         {
@@ -71,7 +106,16 @@ namespace TaskManagementSystem.Controllers
             {
                 return Json(new { success = false, message = "No attachments found." });
             }
-            return Json ( new { success = true,Data = attachments });
+            var result = attachments.Select(a => new
+            {
+                attachmentId = a.AttachmentId,
+                fileName = a.FileName,
+                filePath = Url.Content($"~/Attachments/{Path.GetFileName(a.FilePath)}"), // Convert to URL-safe path
+                fileType = a.FileType,
+                fileSize = a.FileSize
+            });
+
+            return Json(new { success = true, data = result });
         }
 
         public IActionResult AddTask()

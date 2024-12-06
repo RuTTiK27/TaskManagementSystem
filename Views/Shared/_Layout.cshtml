@@ -31,9 +31,8 @@
                                 <img src="~/Images/ProfilePictures/@ViewBag.userDetails.ProfilePicture" alt="mdo" width="42" height="42" class="rounded-circle">
                             </a>
                             <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
-                                <li><a class="dropdown-item" href="#">New Task...</a></li>
-                                <li><a class="dropdown-item" href="#">Settings</a></li>
-                                <li><a class="dropdown-item" href="#">Profile</a></li>
+                                <li><a class="dropdown-item" asp-action="AddTask" asp-controller="Task">New Task...</a></li>
+                                <li><a class="dropdown-item" asp-action="UserProfile" asp-controller="User">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-action="Index" asp-controller="Home" asp-route-isFromLogout="Yes" >Sign out</a></li>
                             </ul>
@@ -72,34 +71,10 @@
         </div>
     </div>
 
-    <script>
-        const sessionTimeout = 15 * 60 * 1000;
-        const warningTime = 14 * 60 * 1000;
-
-        setTimeout(()=>{
-            if(confirm("Your session is about to expire. Would you like to extend it?")){
-                fetch('/Home/ExtendSession',{method:'POST'})
-                .then(response=>{
-                    if(response.ok){
-                        alert("Your session has been extended!");
-                    }else{
-                        alert('Unable to extend the session. Please login again');
-                    }
-                });
-            }
-        },warningTime);
-    </script>
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    <script>
-        //Show toast if the server sends a flag
-        if (document.getElementById('showToast').value == "Yes") {
-            var toastLiveExample = document.getElementById('liveToast')
-            var toast = new bootstrap.Toast(toastLiveExample)
-            toast.show()
-        }
-    </script>
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

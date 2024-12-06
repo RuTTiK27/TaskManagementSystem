@@ -20,3 +20,24 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/*UserDashboard.cshtml*/
+.bg-purple {
+    background-color: #6f42c1;
+}
+
+.task-list-container {
+    max-height: 500px; /* Adjust based on your layout */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/*AddTask.cshtml*/
+#filePreview {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}

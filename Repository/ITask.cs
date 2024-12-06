@@ -14,7 +14,7 @@ namespace TaskManagementSystem.Repository
         bool AddAttachment(Attachment attachment);
         public void saveAttachments();
 
-        List<Task> GetAllTask();
+        List<Task> GetAllTask(int userId);
 
         List<Attachment> GetAttachments(int taskId);
     }

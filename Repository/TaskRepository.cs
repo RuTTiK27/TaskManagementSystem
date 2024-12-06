@@ -83,26 +83,18 @@ namespace TaskManagementSystem.Repository
             context.SaveChanges();
         }
 
-        public List<Task> GetAllTask()
+        public List<Task> GetAllTask(int userId)
         {
             return context.Tasks
             .Include(t => t.Priority)
             .Include(t => t.Status)
             .Include(t=>t.Attachments)
-            .ToList();
+            .Where(t => t.AssignedUserId == userId).ToList();
         }
 
         public List<Attachment> GetAttachments(int taskId)
         {
-            var attachments = context.Attachments.Where(t => t.TaskId == taskId).ToList();
-            var result = attachments.Select(a => new
-            {
-                id = a.AttachmentId,
-                fileName = a.FileName,
-                fileType = a.FileType,
-                downloadUrl = Url.Content($"~/Attachments/{a.FileName}")
-            });
-            return result;
+            return context.Attachments.Where(t => t.TaskId == taskId).ToList();
         }
     }
 }

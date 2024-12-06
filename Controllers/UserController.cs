@@ -169,11 +169,12 @@ namespace TaskManagementSystem.Controllers
                     TempData["fromForgotPassword"] = "Yes";
                 }
 
+                var email = "";                
                 var userDetails = HttpContext.Session.GetString("UserDetails");
-                var email = "";
+                User user = new Models.User();
                 if (userDetails != null)
                 {
-                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    user = JsonSerializer.Deserialize<User>(userDetails);
                     email = user.Email;
                 }
 
@@ -201,11 +202,12 @@ namespace TaskManagementSystem.Controllers
         {
             try
             {
-                var userDetails = HttpContext.Session.GetString("UserDetails");
                 var email = "";
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                User user = new Models.User();
                 if (userDetails != null)
                 {
-                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    user = JsonSerializer.Deserialize<User>(userDetails);
                     email = user.Email;
                 }
 
@@ -247,11 +249,12 @@ namespace TaskManagementSystem.Controllers
         {
             try
             {
-                var userDetails = HttpContext.Session.GetString("UserDetails");
                 var email = "";
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                User user = new Models.User();
                 if (userDetails != null)
                 {
-                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    user = JsonSerializer.Deserialize<User>(userDetails);
                     email = user.Email;
                 }
 
@@ -303,11 +306,12 @@ namespace TaskManagementSystem.Controllers
         {
             if (ModelState.IsValid) 
             {
-                var userDetails = HttpContext.Session.GetString("UserDetails");
                 var email = "";
+                var userDetails = HttpContext.Session.GetString("UserDetails");
+                User user = new Models.User();
                 if (userDetails != null)
                 {
-                    var user = JsonSerializer.Deserialize<dynamic>(userDetails);
+                    user = JsonSerializer.Deserialize<User>(userDetails);
                     email = user.Email;
                 }
 
