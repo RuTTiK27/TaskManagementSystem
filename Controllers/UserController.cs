@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Text.Json;
+using System.Threading.Tasks;
 using TaskManagementSystem.Models;
 using TaskManagementSystem.Repository;
 using TaskManagementSystem.Services;
@@ -318,6 +319,8 @@ namespace TaskManagementSystem.Controllers
                 if (_userRepository.UpdatePassword(email, HashPassword(userResetPasswordViewModel.Password)))
                 {
                     setSesson(email, true);
+                    TempData["ShowToast"] = "Yes";
+                    TempData["toastMessage"] = "Password Updated";
                     return RedirectToAction("UserDashboard", "Task");
                 }
             }
