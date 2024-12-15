@@ -8,6 +8,7 @@ namespace TaskManagementSystem.Models
 {
     public class AddTaskViewModel
     {
+
         [Required]
         [MaxLength(200)]
         public string Title { get; set; } = null!;
@@ -31,5 +32,8 @@ namespace TaskManagementSystem.Models
 
         [ValidateNever]
         public List<IFormFile> Attachments { get; set; }
+
+        [ValidateNever]
+        public List<Attachment> HasAttachments { get; set; }
     }
 }

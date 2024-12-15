@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using TaskManagementSystem.Filters;
 using TaskManagementSystem.Models;
 using TaskManagementSystem.Repository;
@@ -238,6 +239,7 @@ namespace TaskManagementSystem.Controllers
                     _taskRepository.saveAttachments();
                 }
                 TempData["ShowToast"] = "Yes";
+                TempData["toastMessage"] = "Task Added";
                 return RedirectToAction("UserDashboard","Task");
             }
             else
@@ -250,7 +252,155 @@ namespace TaskManagementSystem.Controllers
                 
             }
             return View(addTaskViewModel);
-        } 
+        }
+
+        public IActionResult UpdateTask(int TaskId) 
+        {
+            TempData["TaskId"] = TaskId;
+            TempData.Keep();
+            var task = _taskRepository.EditTask(TaskId);
+            var Priorities = _taskRepository.getPriorities();
+            var Statues = _taskRepository.getStatuses();
+            AddTaskViewModel addTaskViewModel = new AddTaskViewModel()
+            {
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                PriorityId = task.PriorityId,
+                StatusId = task.StatusId,
+                HasAttachments = task.Attachments.ToList(),
+                Priorities = Priorities,
+                Statuses = Statues
+            };
+            return View(addTaskViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateTask(AddTaskViewModel addTaskViewModel)
+        {
+            if (addTaskViewModel.PriorityId == 0)
+            {
+                ModelState.AddModelError("PriorityId", "Please Select Priority");
+            }
+            if (addTaskViewModel.StatusId == 0)
+            {
+                ModelState.AddModelError("StatusId", "Please Select Status");
+            }
+
+            if (addTaskViewModel.Attachments != null)
+            {
+                var validExtensions = new[] { "jpg", "jpeg", "png", "heic", "pdf", "docx", "xlsx", "doc", "xls", "mp4", "mkv" };
+                const long maxSize = 4 * 1024 * 1024; //4MB in bytes
+                if (addTaskViewModel.Attachments.Count > 4)
+                {
+                    ModelState.AddModelError("Attachments", "More than 4 files are not allowed");
+                }
+                foreach (var file in addTaskViewModel.Attachments)
+                {
+                    if (file != null)
+                    {
+                        var fileExtension = Path.GetExtension(file.FileName).ToLower();
+                        if (validExtensions.Contains(fileExtension))
+                        {
+                            ModelState.AddModelError("Attachments", $"File {file.FileName} has an invalid file type.");
+                            return View(addTaskViewModel);
+                        }
+                        if (file.Length > maxSize)
+                        {
+                            ModelState.AddModelError("Attachments", $"File {file.FileName} exceeds the 8MB size limit.");
+                            return View(addTaskViewModel);
+                        }
+                    }
+                }
+            }
+
+            var userDetails = HttpContext.Session.GetString("UserDetails");
+            User user = new Models.User();
+            if (userDetails != null)
+            {
+                user = JsonSerializer.Deserialize<User>(userDetails);
+            }
+
+            if (ModelState.IsValid)
+            {
+                Task task = new Task()
+                {
+                    TaskId = Convert.ToInt32(TempData["TaskId"].ToString()),
+                    Title = addTaskViewModel.Title,
+                    Description = addTaskViewModel.Description,
+                    DueDate = addTaskViewModel.DueDate,
+                    PriorityId = addTaskViewModel.PriorityId,
+                    StatusId = addTaskViewModel.StatusId,
+                    AssignedUserId = user.UserId,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = null
+                };
+                var taskId = _taskRepository.UpdateTask(task);
+                if (addTaskViewModel.Attachments != null)
+                {
+                    foreach (var file in addTaskViewModel.Attachments)
+                    {
+                        string folder = Path.Combine(_environment.WebRootPath, "Attachments/");
+                        string filename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(file.FileName);
+                        string filePath = Path.Combine(folder, filename);
+
+                        using (var fileStram = new FileStream(filePath, FileMode.Create))
+                        {
+                            file.CopyTo(fileStram);
+                        }
+                        Attachment attachment = new Attachment()
+                        {
+                            FileName = file.FileName,
+                            FilePath = filePath,
+                            FileType = Path.GetExtension(file.FileName).ToLower(),
+                            FileSize = Convert.ToInt32(file.Length / (1024.0 * 1024.0)),
+                            IsDeleted = false,
+                            TaskId = taskId,
+                            CreatedDate = DateTime.Now,
+                            UpdatedDate = null,
+                        };
+                        _taskRepository.AddAttachment(attachment);
+                    }
+                    _taskRepository.saveAttachments();
+                }
+                TempData["ShowToast"] = "Yes";
+                TempData["toastMessage"] = "Task "+taskId+" Updated";
+                return RedirectToAction("UserDashboard", "Task");
+            }
+            else
+            {
+                var Priorities = _taskRepository.getPriorities();
+                var Statues = _taskRepository.getStatuses();
+
+                addTaskViewModel.Priorities = Priorities;
+                addTaskViewModel.Statuses = Statues;
+
+            }
+            return View(addTaskViewModel);
+        }
+
+        public IActionResult DeleteAttatchment(int AttachmentId) 
+        {
+            var TaskId = TempData["TaskId"].ToString();
+
+            var result = _taskRepository.DeleteAttachment(AttachmentId);
+            return RedirectToAction("UpdateTask","Task", new { TaskId = TaskId });
+        }
+        public IActionResult DeleteTask(int taskId)
+        {
+            var isDeleted = _taskRepository.DeleteTask(taskId);
+            if (isDeleted)
+            {
+                TempData["ShowToast"] = "Yes";
+                TempData["toastMessage"] = "Task " + taskId + " Deleted";
+            }
+            else
+            {
+                TempData["ShowToast"] = "Yes";
+                TempData["toastMessage"] = "Task " + taskId + " NOT Deleted";
+            }
+            return RedirectToAction("UserDashboard", "Task");
+        }
     }
 }
 

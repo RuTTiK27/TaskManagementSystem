@@ -79,6 +79,7 @@ function previewFiles() {
             listItem.textContent = files[i].name;
             list.appendChild(listItem);
         }
+        preview.append("These files will be uploaded. If you have selected the wrong file(s), please select them again carefully.");
         preview.appendChild(list);
     } else {
         preview.textContent = 'No files selected';
@@ -124,4 +125,30 @@ function disableResendButton() {
             timerMsg.style.display = 'none';
         }
     }, 1000);
+}
+
+document.querySelectorAll('.open-modal').forEach(button => {
+    button.addEventListener('click', function () {
+        const entity = this.getAttribute('data-entity'); 
+        const entityId = this.getAttribute('data-id');
+        const entityName = this.getAttribute('data-filename');
+        showModal(entity, entityId, entityName)
+    });
+});
+
+function showModal(entity,entityId, entityName) {
+    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+        keyboard: false
+    });
+    myModal.show();
+    if (entity == "attachment") {
+        document.getElementById('entityId').href = `/Task/DeleteAttatchment/?AttachmentId=${entityId}`;
+        document.getElementById('entityName').innerText = entityName
+        document.getElementById('entityLabel').innerText = "Are you sure you want to delete attachment?";
+    } else if (entity == "task") {
+        document.getElementById('entityId').href = `/Task/DeleteTask/?taskId=${entityId}`;
+        document.getElementById('entityName').innerText = entityName
+        document.getElementById('entityLabel').innerText = "Are you sure you want to delete this task?";
+    }
+    
 }

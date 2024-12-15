@@ -21,19 +21,19 @@
             </a>
         </div>
         <div class="col-9 d-flex">
-                <form asp-action="UserDashboard" asp-controller="Task" method="get">
-                    <div class="input-group ">
-                        <input type="text" name="search" class="form-control" placeholder="Search by task name" required>
-                        <button class="btn btn-outline-light" type="submit" id="button-addon2">Search</button>
-                    </div>
-                </form>
-                <form asp-action="UserDashboard" asp-controller="Task" method="get">
-                    <div class="input-group ms-3">
-                        @* <input type="text" class="form-control" placeholder="Search by task name"> *@
-                        <input type="date" required name="dueDate" class="btn btn-light " placeholder="select date" title="Search by due date" />
-                        <button class="btn btn-outline-light" type="submit" id="button-addon2">Show</button>
-                    </div>
-                </form>
+            <form asp-action="UserDashboard" asp-controller="Task" method="get">
+                <div class="input-group ">
+                    <input type="text" name="search" class="form-control" placeholder="Search by task name" required>
+                    <button class="btn btn-outline-light" type="submit" id="button-addon2">Search</button>
+                </div>
+            </form>
+            <form asp-action="UserDashboard" asp-controller="Task" method="get">
+                <div class="input-group ms-3">
+                    @* <input type="text" class="form-control" placeholder="Search by task name"> *@
+                    <input type="date" required name="dueDate" class="btn btn-light " placeholder="select date" title="Search by due date" />
+                    <button class="btn btn-outline-light" type="submit" id="button-addon2">Show</button>
+                </div>
+            </form>
 
             <div class="dropdown">
                 <button class="btn text-light dropdown-toggle ms-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -113,14 +113,14 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row">
         <div class="col-6">
             <div class="my-3 p-3 bg-white rounded shadow-lg task-list-container">
                 <h6 class="border-bottom pb-2 mb-0">All</h6>
                 @foreach (var item in Model)
                 {
-                    <partial name="_TaskPartialView" model="item"></partial>
+                        <partial name="_TaskPartialView" model="item"></partial>
                 }
             </div>
         </div>
@@ -138,7 +138,7 @@
                             </tr>
                         </thead>
                         <tbody id="attachments-body">
-                            
+
                         </tbody>
                     </table>
                 </div>
@@ -148,11 +148,53 @@
 
     @{
         var showToast = "";
-        if (TempData["ShowToast"] != null)
+        var toastMessage = "";
+        if (TempData["ShowToast"] != null && TempData["toastMessage"]!=null)
         {
             showToast = TempData["ShowToast"].ToString();
+            toastMessage = TempData["toastMessage"].ToString();
+
+            <input type="hidden" value="@showToast" id="showToast" />
+
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" focusable="false">
+                            <title>X</title>
+                            <rect width="100%" height="100%" fill="#5A34A6" />
+                        </svg>
+                        <strong class="me-auto">Task Management System</strong>
+                        <small>Just now</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        @toastMessage
+                    </div>
+                </div>
+            </div>
+
         }
-        <input type="hidden" value="@showToast" id="showToast" />
+        
     }
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="entityLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="entityLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="entityName"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a class="btn btn-danger" id="entityId">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 

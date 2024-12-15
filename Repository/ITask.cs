@@ -17,5 +17,11 @@ namespace TaskManagementSystem.Repository
         List<Task> GetAllTask(int userId);
 
         List<Attachment> GetAttachments(int taskId);
+        Task EditTask(int taskId);
+
+        int UpdateTask(Task task);
+
+        bool DeleteAttachment(int attachmentId);
+        bool DeleteTask(int taskId);
     }
 }
