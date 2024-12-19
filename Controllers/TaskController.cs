@@ -256,6 +256,14 @@ namespace TaskManagementSystem.Controllers
 
         public IActionResult UpdateTask(int TaskId) 
         {
+            var userDetails = HttpContext.Session.GetString("UserDetails");
+            User user = new Models.User();
+            if (userDetails != null)
+            {
+                user = JsonSerializer.Deserialize<User>(userDetails);
+                ViewBag.userDetails = user;
+            }
+
             TempData["TaskId"] = TaskId;
             TempData.Keep();
             var task = _taskRepository.EditTask(TaskId);
